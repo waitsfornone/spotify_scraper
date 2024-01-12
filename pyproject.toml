@@ -6,7 +6,11 @@ authors = ["Tim Enders <enders.tim@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11"
+dbt-core = "^1.7.4"
+dbt-duckdb = "1.7.0"
+spotipy = "^2.23.0"
+prefect = "^2.14.15"
 
 
 [build-system]
