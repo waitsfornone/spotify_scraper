@@ -5,11 +5,11 @@ from prefect.blocks.system import String
 
 
 @task
-def get_recent_tracks():
+def get_recent_tracks(after_date):
     scope = 'user-read-recently-played'
     spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
 
-    results = spotify.current_user_recently_played()
+    results = spotify.current_user_recently_played(after=after_date)
 
     return results
 
@@ -20,8 +20,9 @@ def scrape_plays(full_load=False):
         start_date = String.load("backfill-start")
     else:
         start_date = String.load("current-timestamp")
-    print(start_date)
+    get_recent_tracks(start_date)
 
 
 if __name__ == "__main__":
-    scrape_plays()
+    plays = scrape_plays()
+    print(plays['items'])
