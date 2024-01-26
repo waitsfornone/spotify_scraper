@@ -20,10 +20,9 @@ def scrape_plays(full_load=False):
         start_date = String.load("backfill-start").value
     else:
         start_date = String.load("current-timestamp").value
-    print(start_date)
-    # get_recent_tracks(start_date)
+    get_recent_tracks(start_date)
 
 
 if __name__ == "__main__":
     plays = scrape_plays()
-    # print(plays['items'])
+    print(plays['items'])
