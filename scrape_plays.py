@@ -10,6 +10,7 @@ def get_recent_tracks(after_date):
     spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
 
     results = spotify.current_user_recently_played(after=after_date)
+    print(results)
 
     return results
 
