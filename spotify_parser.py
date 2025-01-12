@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 import os
 
-def parse_spotify_plays_to_db(b2_resource, bucket_name, db_name="YOUR_MOTHERDUCK_DB"):
+def parse_spotify_plays_to_db(b2_resource, bucket_name, db_name="my_db"):
     """Parse JSON files from B2 bucket into MotherDuck database"""
     
     # Get MotherDuck token from environment variable
