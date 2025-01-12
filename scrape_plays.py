@@ -1,19 +1,10 @@
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
 import boto3
 from botocore.config import Config
 import os
 import json
-
-
-def get_recent_tracks(after_date):
-    scope = 'user-read-recently-played'
-    spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
-
-    results = spotify.current_user_recently_played(after=after_date)
-    # print(results)
-
-    return results
+from datetime import datetime
+from spotify_scraper import get_recent_tracks
+from spotify_parser import parse_spotify_plays_to_db
 
 def get_b2_resource(endpoint, key_id, application_key):
     b2 = boto3.resource(service_name='s3',
@@ -33,16 +24,31 @@ def main():
     with open("./current_timestamp.txt", "r") as inf:
         after_date = inf.read()
 
-    data = get_recent_tracks(after_date)
-    cursors = data['cursors']
-    print(cursors)
+    # Get tracks and new cursor
+    data, new_cursor = get_recent_tracks(after_date)
+    
+    # Check if we got any new tracks
+    if not data['items']:
+        print("No new tracks found since last check.")
+        return
+    
+    # Save the new cursor for next run
+    with open("./current_timestamp.txt", "w") as outf:
+        outf.write(new_cursor)
+    
+    # Convert after_date (milliseconds) to datetime and format filename
+    start_datetime = datetime.fromtimestamp(int(after_date)/1000)
+    timestamp = start_datetime.strftime("%Y%m%d_%H%M%S")
+    filename = f'spotify_plays_{timestamp}.json'
+    
     data_as_bytes = json.dumps(data).encode('utf-8')
+    
     b2_resource = get_b2_resource(b2_endpoint, b2_key_id, b2_app_key)
     spotify_bucket = b2_resource.Bucket('spotify-plays-raw')
-    # spotify_bucket.upload_fileobj(data_as_bytes, 'test_file.json')
-    spotify_bucket.Object('test_file.json').put(Body=bytes(data_as_bytes))
-    # breakpoint()
-
+    spotify_bucket.Object(filename).put(Body=bytes(data_as_bytes))
+    
+    # After uploading new data, parse all files into DuckDB
+    parse_spotify_plays_to_db(b2_resource, 'spotify-plays-raw')
 
 if __name__ == "__main__":
     main()
