@@ -26,9 +26,7 @@ def parse_spotify_plays_to_db(b2_resource, bucket_name, db_name="my_db"):
             track_id VARCHAR,
             artist_id VARCHAR,
             album_id VARCHAR,
-            duration_ms INTEGER,
-            file_timestamp TIMESTAMP,
-            processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            duration_ms INTEGER
         )
     """)
     
@@ -37,16 +35,6 @@ def parse_spotify_plays_to_db(b2_resource, bucket_name, db_name="my_db"):
     
     for obj in bucket.objects.all():
         if not obj.key.endswith('.json'):
-            continue
-            
-        # Extract timestamp from filename
-        try:
-            file_timestamp = datetime.strptime(
-                obj.key.replace('spotify_plays_', '').replace('.json', ''),
-                "%Y%m%d_%H%M%S"
-            )
-        except ValueError:
-            print(f"Skipping file with invalid timestamp format: {obj.key}")
             continue
             
         print(f"Processing file: {obj.key}")
@@ -67,8 +55,7 @@ def parse_spotify_plays_to_db(b2_resource, bucket_name, db_name="my_db"):
                 'track_id': track['id'],
                 'artist_id': track['artists'][0]['id'],
                 'album_id': track['album']['id'],
-                'duration_ms': track['duration_ms'],
-                'file_timestamp': file_timestamp
+                'duration_ms': track['duration_ms']
             })
         
         if rows:
@@ -77,7 +64,7 @@ def parse_spotify_plays_to_db(b2_resource, bucket_name, db_name="my_db"):
             con.execute("""
                 INSERT INTO spotify_plays (
                     played_at, track_name, artist_name, album_name,
-                    track_id, artist_id, album_id, duration_ms, file_timestamp
+                    track_id, artist_id, album_id, duration_ms
                 )
                 SELECT * FROM df
             """)
