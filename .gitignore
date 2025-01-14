@@ -161,8 +161,8 @@ cython_debug/
 *.lock
 
 # Spotify cache folders
-spotify_kids_data/
-spotify_play_data/
+spotify_kids_data/*
+spotify_play_data/*
 
 # Other files
 index.txt
