@@ -1,20 +1,7 @@
-[tool.poetry]
+[project]
 name = "spotify-scraper"
 version = "0.1.0"
-description = "Scraper to get plays from spotify"
-authors = ["Tim Enders <enders.tim@gmail.com>"]
+description = "Add your description here"
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.11"
-dbt-core = "^1.7.4"
-dbt-duckdb = "1.7.0"
-spotipy = "^2.23.0"
-prefect = "^2.14.15"
-boto3 = "^1.34.34"
-pandas = "^2.2.3"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires-python = ">=3.11"
+dependencies = []
