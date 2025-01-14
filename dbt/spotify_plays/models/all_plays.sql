@@ -8,6 +8,7 @@ WITH historical AS (
         skipped,
         'historical' as source
     FROM historical_plays
+    WHERE artist_name is not null
 ),
 
 current AS (
