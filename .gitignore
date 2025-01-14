@@ -159,3 +159,10 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 *.lock
+
+# Spotify cache folders
+spotify_kids_data/
+spotify_play_data/
+
+# Other files
+index.txt
