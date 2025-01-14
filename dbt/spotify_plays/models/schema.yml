@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: all_plays
+    description: "Combined view of historical and current Spotify plays"
+    columns:
+      - name: played_at
+        description: "When the track was played"
+        tests:
+          - not_null
+      - name: track_name
+        description: "Name of the track"
+        tests:
+          - not_null
+      - name: artist_name
+        description: "Name of the artist"
+        tests:
+          - not_null
+      - name: track_id
+        description: "Spotify track ID" 
