@@ -213,12 +213,12 @@ def get_database_stats(con):
 def print_database_stats(con):
     """
     Print formatted database statistics.
-    
+
     Args:
         con: DuckDB connection object
     """
     stats = get_database_stats(con)
-    
+
     print("\n" + "="*60)
     print("DATABASE STATISTICS")
     print("="*60)
@@ -231,3 +231,120 @@ def print_database_stats(con):
     for idx, row in stats['top_tracks'].iterrows():
         print(f"  {idx+1}. {row['track_name']} - {row['artist_name']} ({row['play_count']} plays)")
     print("="*60 + "\n")
+
+
+def init_tracks_table(con):
+    """
+    Initialize the all_tracks table if it doesn't exist.
+
+    Args:
+        con: DuckDB connection object
+    """
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS all_tracks (
+            track_id VARCHAR PRIMARY KEY,
+            name VARCHAR,
+            album_id VARCHAR,
+            album_name VARCHAR,
+            album_release_date VARCHAR,
+            album_total_tracks INTEGER,
+            artist_id VARCHAR,
+            artist_name VARCHAR,
+            duration_ms INTEGER,
+            explicit BOOLEAN,
+            popularity INTEGER,
+            preview_url VARCHAR,
+            spotify_url VARCHAR,
+            is_local BOOLEAN,
+            disc_number INTEGER,
+            track_number INTEGER,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    print("Tracks table ready")
+
+
+def insert_track_to_local_db(con, track_data):
+    """
+    Insert a single track into the all_tracks table with deduplication.
+
+    Args:
+        con: DuckDB connection object
+        track_data: Dictionary containing track information from Spotify API
+
+    Returns:
+        bool: True if inserted, False if already existed
+    """
+    import pandas as pd
+
+    # Transform track data into row
+    row = {
+        'track_id': track_data['id'],
+        'name': track_data['name'],
+        'album_id': track_data['album']['id'],
+        'album_name': track_data['album']['name'],
+        'album_release_date': track_data['album']['release_date'],
+        'album_total_tracks': track_data['album']['total_tracks'],
+        'artist_id': track_data['artists'][0]['id'],
+        'artist_name': track_data['artists'][0]['name'],
+        'duration_ms': track_data['duration_ms'],
+        'explicit': track_data['explicit'],
+        'popularity': track_data['popularity'],
+        'preview_url': track_data.get('preview_url'),
+        'spotify_url': track_data['external_urls']['spotify'],
+        'is_local': track_data['is_local'],
+        'disc_number': track_data['disc_number'],
+        'track_number': track_data['track_number']
+    }
+
+    # Convert to DataFrame
+    df = pd.DataFrame([row])
+
+    # Count before insert
+    count_before = con.execute("SELECT COUNT(*) FROM all_tracks").fetchone()[0]
+
+    # Insert with deduplication
+    con.execute("""
+        INSERT OR REPLACE INTO all_tracks (
+            track_id, name, album_id, album_name, album_release_date,
+            album_total_tracks, artist_id, artist_name, duration_ms,
+            explicit, popularity, preview_url, spotify_url, is_local,
+            disc_number, track_number, last_updated
+        )
+        SELECT
+            track_id, name, album_id, album_name, album_release_date,
+            album_total_tracks, artist_id, artist_name, duration_ms,
+            explicit, popularity, preview_url, spotify_url, is_local,
+            disc_number, track_number, CURRENT_TIMESTAMP
+        FROM df
+    """)
+
+    # Count after insert
+    count_after = con.execute("SELECT COUNT(*) FROM all_tracks").fetchone()[0]
+
+    return count_after > count_before
+
+
+def get_tracks_needing_enrichment(con):
+    """
+    Get list of track IDs from spotify_plays that don't have enrichment data.
+
+    Args:
+        con: DuckDB connection object
+
+    Returns:
+        DataFrame with track_id, track_name, and play_count
+    """
+    return con.execute("""
+        SELECT DISTINCT
+            p.track_id,
+            p.track_name,
+            COUNT(*) as play_count
+        FROM spotify_plays p
+        LEFT JOIN all_tracks t ON p.track_id = t.track_id
+        WHERE p.track_id IS NOT NULL
+          AND p.track_id != ''
+          AND t.track_id IS NULL
+        GROUP BY p.track_id, p.track_name
+        ORDER BY play_count DESC
+    """).fetchdf()
