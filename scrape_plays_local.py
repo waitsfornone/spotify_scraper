@@ -97,26 +97,58 @@ def main():
     start_datetime = datetime.fromtimestamp(int(starting_timestamp) / 1000)
     print(f"Fetching plays since: {start_datetime}")
 
+<<<<<<< Updated upstream
+=======
+    # Show current database stats before fetching
+    current_count = con.execute("SELECT COUNT(*) FROM spotify_plays").fetchone()[0]
+    print(f"Current plays in database: {current_count:,}")
+
+>>>>>>> Stashed changes
     # Fetch recent tracks from Spotify
     print("\n" + "-"*60)
     print("FETCHING TRACKS FROM SPOTIFY")
     print("-"*60)
+<<<<<<< Updated upstream
+=======
+    print("Note: This may take a while depending on how many new tracks there are...")
+    print("")
+>>>>>>> Stashed changes
 
     try:
         plays_data, new_cursor = get_recent_tracks(starting_timestamp)
     except Exception as e:
+<<<<<<< Updated upstream
         print(f"Error fetching tracks from Spotify: {e}")
+=======
+        print(f"\nError fetching tracks from Spotify: {e}")
+>>>>>>> Stashed changes
         con.close()
         sys.exit(1)
 
     # Check if we got any new tracks
     if not plays_data['items']:
+<<<<<<< Updated upstream
         print("\nNo new tracks found since last check")
+=======
+        print("\n✅ No new tracks found since last check")
+>>>>>>> Stashed changes
         print_database_stats(con)
         con.close()
         return
 
+<<<<<<< Updated upstream
     print(f"\nFetched {len(plays_data['items'])} tracks from Spotify API")
+=======
+    print(f"\n✅ Fetched {len(plays_data['items'])} tracks from Spotify API")
+
+    # Show a sample of what was fetched
+    if plays_data['items']:
+        latest = plays_data['items'][0]
+        oldest = plays_data['items'][-1]
+        print(f"\nDate range of fetched tracks:")
+        print(f"  Latest: {latest['played_at']} - {latest['track']['name']}")
+        print(f"  Oldest: {oldest['played_at']} - {oldest['track']['name']}")
+>>>>>>> Stashed changes
 
     # Insert plays into local database
     print("\n" + "-"*60)
@@ -144,6 +176,10 @@ def main():
     print("\n" + "-"*60)
     print("EXPORTING TO CSV")
     print("-"*60)
+<<<<<<< Updated upstream
+=======
+    print("Exporting full database to CSV for backup...")
+>>>>>>> Stashed changes
 
     try:
         csv_path = export_to_csv(con)
@@ -157,12 +193,22 @@ def main():
         print("\n" + "-"*60)
         print("UPLOADING TO B2")
         print("-"*60)
+<<<<<<< Updated upstream
 
         try:
             uploaded_filename = upload_csv_to_b2(csv_path)
             print(f"Successfully uploaded: {uploaded_filename}")
         except Exception as e:
             print(f"Error uploading to B2: {e}")
+=======
+        print("Uploading CSV to Backblaze B2 cloud storage...")
+
+        try:
+            uploaded_filename = upload_csv_to_b2(csv_path)
+            print(f"✅ Successfully uploaded: {uploaded_filename}")
+        except Exception as e:
+            print(f"⚠️  Error uploading to B2: {e}")
+>>>>>>> Stashed changes
             print(f"CSV file saved locally at: {csv_path}")
             con.close()
             sys.exit(1)
@@ -171,6 +217,7 @@ def main():
         if not args.keep_csv:
             try:
                 os.remove(csv_path)
+<<<<<<< Updated upstream
                 print(f"Cleaned up local CSV file: {csv_path}")
             except Exception as e:
                 print(f"Warning: Could not delete CSV file: {e}")
@@ -179,6 +226,16 @@ def main():
     else:
         print("\n⚠️  Skipping B2 upload (--no-upload flag set)")
         print(f"CSV file saved at: {csv_path}")
+=======
+                print(f"🗑️  Cleaned up local CSV file")
+            except Exception as e:
+                print(f"Warning: Could not delete CSV file: {e}")
+        else:
+            print(f"📁 CSV file kept at: {csv_path}")
+    else:
+        print("\n⚠️  Skipping B2 upload (--no-upload flag set)")
+        print(f"📁 CSV file saved at: {csv_path}")
+>>>>>>> Stashed changes
 
     # Show final statistics
     print_database_stats(con)

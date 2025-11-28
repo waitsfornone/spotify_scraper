@@ -4,10 +4,20 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+dependencies = []
+=======
+>>>>>>> Stashed changes
 dependencies = [
     "boto3>=1.41.1",
     "duckdb>=1.4.2",
     "pandas>=2.3.3",
+<<<<<<< Updated upstream
+=======
+    "spotipy>=2.25.2",
+>>>>>>> Stashed changes
 ]
 
 [tool.setuptools]
@@ -15,3 +25,7 @@ py-modules = []
 
 [tool.setuptools.packages.find]
 exclude = ["dbt*", "data*", "exports*", ".flox*"]
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes

@@ -170,3 +170,7 @@ exports/
 
 # Other files
 index.txt
+<<<<<<< Updated upstream
+=======
+data/
+>>>>>>> Stashed changes
