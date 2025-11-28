@@ -164,5 +164,9 @@ cython_debug/
 spotify_kids_data/*
 spotify_play_data/*
 
+# Local DuckDB and CSV exports
+data/
+exports/
+
 # Other files
 index.txt
